@@ -136,6 +136,9 @@ public class SearchRequest extends RequestBase implements JsonpSerializable {
 	private final Boolean ignoreThrottled;
 
 	@Nullable
+	private final Boolean includeNamedQueriesScore;
+
+	@Nullable
 	private final Boolean ignoreUnavailable;
 
 	private final List<String> index;
@@ -256,6 +259,7 @@ public class SearchRequest extends RequestBase implements JsonpSerializable {
 		this.from = builder.from;
 		this.highlight = builder.highlight;
 		this.ignoreThrottled = builder.ignoreThrottled;
+		this.includeNamedQueriesScore = builder.includeNamedQueriesScore;
 		this.ignoreUnavailable = builder.ignoreUnavailable;
 		this.index = ApiTypeHelper.unmodifiable(builder.index);
 		this.indicesBoost = ApiTypeHelper.unmodifiable(builder.indicesBoost);
@@ -511,6 +515,16 @@ public class SearchRequest extends RequestBase implements JsonpSerializable {
 	@Nullable
 	public final Boolean ignoreThrottled() {
 		return this.ignoreThrottled;
+	}
+
+	/**
+	 * If <code>true</code>, scores associated with the matched queries are returned
+	 * <p>
+	 * API name: {@code include_named_queries_score}
+	 */
+	@Nullable
+	public final Boolean includeNamedQueriesScore() {
+		return this.includeNamedQueriesScore;
 	}
 
 	/**
@@ -1255,6 +1269,9 @@ public class SearchRequest extends RequestBase implements JsonpSerializable {
 		private Boolean ignoreThrottled;
 
 		@Nullable
+		private Boolean includeNamedQueriesScore;
+
+		@Nullable
 		private Boolean ignoreUnavailable;
 
 		@Nullable
@@ -1721,6 +1738,16 @@ public class SearchRequest extends RequestBase implements JsonpSerializable {
 		 */
 		public final Builder ignoreThrottled(@Nullable Boolean value) {
 			this.ignoreThrottled = value;
+			return this;
+		}
+
+		/**
+		 * If <code>true</code>, scores associated with the matched queries are returned
+		 * <p>
+		 * API name: {@code include_named_queries_score}
+		 */
+		public final Builder includeNamedQueriesScore(@Nullable Boolean value) {
+			this.includeNamedQueriesScore = value;
 			return this;
 		}
 
@@ -2619,6 +2646,9 @@ public class SearchRequest extends RequestBase implements JsonpSerializable {
 				}
 				if (request.ignoreThrottled != null) {
 					params.put("ignore_throttled", String.valueOf(request.ignoreThrottled));
+				}
+				if (request.includeNamedQueriesScore != null) {
+					params.put("include_named_queries_score", String.valueOf(request.includeNamedQueriesScore));
 				}
 				if (request.maxConcurrentShardRequests != null) {
 					params.put("max_concurrent_shard_requests", String.valueOf(request.maxConcurrentShardRequests));
