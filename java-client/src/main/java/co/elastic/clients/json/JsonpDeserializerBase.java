@@ -356,6 +356,53 @@ public abstract class JsonpDeserializerBase<V> implements JsonpDeserializer<V> {
         }
     }
 
+    static class StringKeyListOrMapDeserializer<T> extends JsonpDeserializerBase<Map<String, T>> {
+        private final JsonpDeserializer<T> itemDeserializer;
+
+        private final ArrayDeserializer<String> arrayDeserializer = new ArrayDeserializer<>(STRING);
+
+        private final StringMapDeserializer<T> mapDeserializer;
+
+        protected StringKeyListOrMapDeserializer(JsonpDeserializer<T> itemDeserializer) {
+            super(EnumSet.of(Event.START_OBJECT, Event.START_ARRAY));
+            this.itemDeserializer = itemDeserializer;
+            this.mapDeserializer = new StringMapDeserializer<>(itemDeserializer);
+        }
+
+        @Override
+        public Map<String, T> deserialize(JsonParser parser, JsonpMapper mapper, Event event) {
+            Map<String, T> result = new HashMap<>();
+            String key = null;
+            try {
+                if (event == Event.START_ARRAY) {
+                    try {
+                        while ((event = parser.next()) != Event.END_ARRAY) {
+                            // JSON null: add null unless the deserializer can handle it
+                            if (event != Event.VALUE_NULL) {
+                                result.put(parser.getString(), null);
+                            }
+                        }
+                    } catch (Exception e) {
+                        throw JsonpMappingException.from(e, result.size(), parser);
+                    }
+                    return result;
+                } else {
+                    // map
+                    while ((event = parser.next()) != Event.END_OBJECT) {
+                        JsonpUtils.expectEvent(parser, Event.KEY_NAME, event);
+                        key = parser.getString();
+                        T value = itemDeserializer.deserialize(parser, mapper);
+                        result.put(key, value);
+                    }
+                }
+
+            } catch (Exception e) {
+                throw JsonpMappingException.from(e, null, key, parser);
+            }
+            return result;
+        }
+    }
+
     static class EnumMapDeserializer<K, V> extends JsonpDeserializerBase<Map<K, V>> {
         private final JsonpDeserializer<K> keyDeserializer;
         private final JsonpDeserializer<V> valueDeserializer;

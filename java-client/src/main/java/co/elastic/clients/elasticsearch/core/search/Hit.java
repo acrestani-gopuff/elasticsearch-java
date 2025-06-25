@@ -39,9 +39,9 @@ import java.lang.Double;
 import java.lang.Integer;
 import java.lang.Long;
 import java.lang.String;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
@@ -60,6 +60,9 @@ import javax.annotation.Nullable;
 // open an issue or a PR on the API specification repository.
 //
 //----------------------------------------------------------------
+
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
 
 // typedef: _global.search._types.Hit
 
@@ -87,7 +90,7 @@ public class Hit<TDocument> implements JsonpSerializable {
 
 	private final Map<String, InnerHitsResult> innerHits;
 
-	private final List<String> matchedQueries;
+	private final Map<String, Double> matchedQueriesWithScores;
 
 	@Nullable
 	private final NestedIdentity nested;
@@ -136,7 +139,7 @@ public class Hit<TDocument> implements JsonpSerializable {
 		this.fields = ApiTypeHelper.unmodifiable(builder.fields);
 		this.highlight = ApiTypeHelper.unmodifiable(builder.highlight);
 		this.innerHits = ApiTypeHelper.unmodifiable(builder.innerHits);
-		this.matchedQueries = ApiTypeHelper.unmodifiable(builder.matchedQueries);
+		this.matchedQueriesWithScores = ApiTypeHelper.unmodifiable(builder.matchedQueriesWithScores);
 		this.nested = builder.nested;
 		this.ignored = ApiTypeHelper.unmodifiable(builder.ignored);
 		this.ignoredFieldValues = ApiTypeHelper.unmodifiable(builder.ignoredFieldValues);
@@ -215,7 +218,14 @@ public class Hit<TDocument> implements JsonpSerializable {
 	 * API name: {@code matched_queries}
 	 */
 	public final List<String> matchedQueries() {
-		return this.matchedQueries;
+		return new ArrayList<>(this.matchedQueriesWithScores.keySet());
+	}
+
+	/**
+	 * API name: {@code matched_queries}
+	 */
+	public final Map<String, Double> matchedQueriesWithScores() {
+		return this.matchedQueriesWithScores;
 	}
 
 	/**
@@ -379,12 +389,12 @@ public class Hit<TDocument> implements JsonpSerializable {
 			generator.writeEnd();
 
 		}
-		if (ApiTypeHelper.isDefined(this.matchedQueries)) {
+		if (ApiTypeHelper.isDefined(this.matchedQueriesWithScores)) {
 			generator.writeKey("matched_queries");
-			generator.writeStartArray();
-			for (String item0 : this.matchedQueries) {
-				generator.write(item0);
-
+			generator.writeStartObject();
+			for (Map.Entry<String, Double> e : this.matchedQueriesWithScores.entrySet()) {
+				generator.writeKey(e.getKey());
+				generator.write(e.getValue());
 			}
 			generator.writeEnd();
 
@@ -510,7 +520,7 @@ public class Hit<TDocument> implements JsonpSerializable {
 		private Map<String, InnerHitsResult> innerHits;
 
 		@Nullable
-		private List<String> matchedQueries;
+		private Map<String, Double> matchedQueriesWithScores;
 
 		@Nullable
 		private NestedIdentity nested;
@@ -668,17 +678,18 @@ public class Hit<TDocument> implements JsonpSerializable {
 		 * Adds all elements of <code>list</code> to <code>matchedQueries</code>.
 		 */
 		public final Builder<TDocument> matchedQueries(List<String> list) {
-			this.matchedQueries = _listAddAll(this.matchedQueries, list);
+			this.matchedQueriesWithScores =
+					_mapPutAll(this.matchedQueriesWithScores, list.stream().collect(toMap(identity(), s -> Double.NaN)));
 			return this;
 		}
 
 		/**
 		 * API name: {@code matched_queries}
 		 * <p>
-		 * Adds one or more values to <code>matchedQueries</code>.
+		 * Adds all elements of <code>list</code> to <code>matchedQueriesWithScore</code>.
 		 */
-		public final Builder<TDocument> matchedQueries(String value, String... values) {
-			this.matchedQueries = _listAdd(this.matchedQueries, value, values);
+		public final Builder<TDocument> matchedQueriesWithScore(Map<String, Double> map) {
+			this.matchedQueriesWithScores = _mapPutAll(this.matchedQueriesWithScores, map);
 			return this;
 		}
 
@@ -940,8 +951,8 @@ public class Hit<TDocument> implements JsonpSerializable {
 				JsonpDeserializer.arrayDeserializer(JsonpDeserializer.stringDeserializer())), "highlight");
 		op.add(Builder::innerHits, JsonpDeserializer.stringMapDeserializer(InnerHitsResult._DESERIALIZER),
 				"inner_hits");
-		op.add(Builder::matchedQueries, JsonpDeserializer.arrayDeserializer(JsonpDeserializer.stringDeserializer()),
-				"matched_queries");
+		op.add(Builder::matchedQueriesWithScore, JsonpDeserializer.stringListOrMapDeserializer(JsonpDeserializer.doubleDeserializer()),
+					 "matched_queries");
 		op.add(Builder::nested, NestedIdentity._DESERIALIZER, "_nested");
 		op.add(Builder::ignored, JsonpDeserializer.arrayDeserializer(JsonpDeserializer.stringDeserializer()),
 				"_ignored");
